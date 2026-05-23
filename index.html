@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spotify – Who Knows</title>
+  <link rel="shortcut icon" href="assets/Spotify.png" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Circular+Std:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --green: #1DB954;
+      --green-dark: #158a3e;
+      --bg: #121212;
+      --sidebar: #000000;
+      --surface: #181818;
+      --surface2: #282828;
+      --banner: #7B2020;
+      --banner2: #5a1515;
+      --text: #FFFFFF;
+      --muted: #B3B3B3;
+      --bar-bg: #535353;
+      --bar-fill: #B3B3B3;
+      --player-bg: #181818;
+      --transition: 0.18s ease;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* === LAYOUT === */
+    .app {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 90px);
+      overflow: hidden;
+    }
+
+    /* === SIDEBAR === */
+    .sidebar {
+      width: 72px;
+      background: var(--sidebar);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+      gap: 28px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo {
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+      flex: 1;
+    }
+
+    .nav-icon {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color var(--transition);
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .nav-icon:hover,
+    .nav-icon.active {
+      color: var(--text);
+    }
+
+    .nav-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    .nav-icon.add-btn {
+      background: var(--surface2);
+      color: var(--text);
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+    }
+
+    .nav-icon.heart-btn {
+      background: linear-gradient(135deg, #4b27a3, #ffffff);
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+    }
+
+    .bookmark-icon {
+      width: 16px;
+      height: 22px;
+      background: var(--green);
+      clip-path: polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%);
+    }
+
+    /* === MAIN CONTENT === */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 110px;
+    }
+
+    /* === TOPBAR === */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      margin-top: 15px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      background: rgba(18, 18, 18, 0.92);
+      backdrop-filter: blur(8px);
+    }
+
+    .topbar-logo {
+      z-index: 2;
+    }
+
+    .topbar-center {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: min(100%, 650px);
+    }
+
+    .home-btn {
+      flex-shrink: 0;
+      margin-left: 0;
+    }
+
+    .search-bar {
+      flex: 1;
+      max-width: 600px;
+    }
+
+    .home-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text);
+      margin-left: 0;
+      transition: background var(--transition);
+    }
+
+    .search-bar {
+      width: min(600px, 100%);
+    }
+
+    .nav-arrows {
+      display: flex;
+      gap: 8px;
+    }
+
+    .arrow-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.7);
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition);
+    }
+
+    .arrow-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .arrow-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .search-bar {
+      flex: 1;
+      max-width: 600px;
+      height: 40px;
+      border-radius: 20px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 16px;
+      cursor: text;
+    }
+
+    .search-bar svg {
+      width: 18px;
+      height: 18px;
+      fill: #121212;
+      flex-shrink: 0;
+    }
+
+    .search-bar span {
+      color: #757575;
+      font-size: 14px;
+    }
+
+
+    .home-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .home-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    /* === PAGE CONTENT === */
+    .content {
+      flex: 1;
+      padding: 0 0 120px;
+    }
+
+    /* === BANNER === */
+    .banner {
+      margin-top: 20px;
+      background: linear-gradient(135deg, var(--banner) 0%, var(--banner2) 70%, #3a0d0d 100%);
+      padding: 28px 28px 32px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      position: relative;
+      overflow: hidden;
+      min-height: 200px;
+    }
+
+    .banner::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at top right, rgba(255, 255, 255, 0.04), transparent 60%);
+      pointer-events: none;
+    }
+
+    .banner-art {
+      width: 160px;
+      height: 160px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+      .banner-art img {
+      width: 160px;
+      height: 160px;
+      border-radius: 10px;
+    }
+
+    .banner-info {
+      flex: 1;
+    }
+
+    .banner-type {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.75);
+      margin-bottom: 8px;
+    }
+
+    .banner-title {
+      font-size: 48px;
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -1px;
+      margin-bottom: 10px;
+    }
+
+    .banner-artist {
+      font-size: 16px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* === CONTROLS === */
+    .controls-bar {
+      padding: 20px 28px 24px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      background: linear-gradient(to bottom, #3a1010 0%, var(--bg) 100%);
+    }
+
+    .play-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--green);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.1s, background var(--transition);
+      flex-shrink: 0;
+    }
+
+    .play-btn:hover {
+      background: var(--green-dark);
+    }
+
+    .shuffle-btn {
+      width: 42px;
+      height: 42px;
+      background: none;
+      border: none;
+      color: var(--green);
+      cursor: pointer;
+      padding: 4px;
+      transition: color var(--transition), transform 0.1s;
+    }
+
+    .shuffle-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .shuffle-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    /* === SECTIONS === */
+    .section {
+      padding: 24px 28px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .section-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      margin-bottom: 0;
+      transition: background var(--transition);
+      cursor: pointer;
+    }
+
+    .section-card:hover {
+      background: var(--surface2);
+    }
+
+    .section-thumb {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      background-image: url("./assets/DanielCaesar.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .section-body {
+      flex: 1;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    .section-text {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.85);
+      line-height: 1.7;
+    }
+
+    .iniciar-btn {
+      background: var(--green);
+      color: #000;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 24px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: background var(--transition), transform 0.1s;
+      margin-top: 14px;
+      display: inline-block;
+    }
+
+    .iniciar-btn:hover {
+      background: var(--green-dark);
+      transform: scale(1.03);
+    }
+
+    /* === LYRICS SECTION === */
+    .lyrics-section {
+      padding: 24px 28px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .lyrics-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .lyrics-text {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.88);
+      line-height: 2;
+    }
+
+    /* === BEST PART SECTION === */
+    .best-part-section {
+      margin: 32px 28px 0;
+      padding: 28px;
+      border-top: none;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+    }
+
+    .best-part-card {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .best-part-body {
+      flex: 1;
+    }
+
+    .best-part-body .section-title {
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+
+    .best-part-lines {
+      background: linear-gradient(135deg, #7B2020 0%, #5a1515 100%);
+      border-radius: 14px;
+      padding: 22px 26px;
+      margin-top: 4px;
+    }
+
+    .best-part-line {
+      margin-bottom: 14px;
+    }
+
+    .best-part-line:last-child {
+      margin-bottom: 0;
+    }
+
+    .lyric-en {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.4;
+    }
+
+    .lyric-pt {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.65);
+      margin-top: 2px;
+      line-height: 1.4;
+    }
+
+    /* === PLAYER === */
+    .player {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 90px;
+      background: var(--player-bg);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 100;
+    }
+
+    .player-song {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 200px;
+    }
+
+    .player-thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: 6px;
+      background-image: url(assets/DanielCaesar.png);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .player-thumb img {
+      width: 44px;
+      height: 44px;
+      border-radius: 6px;
+    }
+
+    .player-info {
+      overflow: hidden;
+    }
+
+    .player-name {
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .player-artist {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .player-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      max-width: 480px;
+      padding: 0 32px;
+    }
+
+    .player-buttons {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .ctrl-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color var(--transition);
+    }
+
+    .ctrl-btn:hover {
+      color: var(--text);
+    }
+
+    .ctrl-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    .player-play-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--text);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .player-play-btn:hover {
+      transform: scale(1.06);
+    }
+
+    .play-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: #000;
+      margin-left: 0;
+    }
+
+    .progress-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .time {
+      font-size: 11px;
+      color: var(--muted);
+      min-width: 30px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 4px;
+      background: var(--bar-bg);
+      border-radius: 2px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--bar-fill);
+      border-radius: 2px;
+      width: 22%;
+      position: relative;
+      transition: background 0.15s;
+    }
+
+    .progress-bar:hover .progress-fill {
+      background: var(--green);
+    }
+
+    .progress-fill::after {
+      content: '';
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--text);
+      position: absolute;
+      right: -6px;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .progress-bar:hover .progress-fill::after {
+      opacity: 1;
+    }
+
+    .player-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 180px;
+      justify-content: flex-end;
+    }
+
+    .vol-bar {
+      width: 80px;
+      height: 4px;
+      background: var(--bar-bg);
+      border-radius: 2px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .vol-fill {
+      height: 100%;
+      background: var(--bar-fill);
+      border-radius: 2px;
+      width: 70%;
+    }
+
+    .vol-bar:hover .vol-fill {
+      background: var(--green);
+    }
+
+    /* === SCROLLBAR === */
+    .main::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .main::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .main::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+
+    .main::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    /* === FADE GRADIENT === */
+    .fade-in {
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Page title top */
+    .page-title-bar {
+      padding: 0 28px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-top: 16px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- === APP WRAPPER === -->
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <!-- Spotify logo icon -->
+      <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="16" fill="#1DB954" />
+        <path
+          d="M22.9 14.5c-3.7-2.2-9.8-2.4-13.3-1.3-.6.2-1.2-.2-1.3-.7-.2-.6.2-1.2.7-1.3 4-1.2 10.7-1 14.9 1.5.5.3.7 1 .4 1.5-.3.5-1 .7-1.4.3zM22.6 17.5c-.3.4-.8.6-1.3.3-3.1-1.9-7.7-2.4-11.4-1.3-.5.1-1-.2-1.1-.7-.1-.5.2-1 .7-1.1 4.2-1.3 9.3-.7 12.8 1.5.4.3.5.9.3 1.3zM21.2 20.4c-.2.4-.7.5-1.1.3-2.7-1.6-6.1-2-10-1.1-.4.1-.8-.2-.9-.6-.1-.4.2-.8.6-.9 4.3-1 8.2-.6 11.2 1.3.4.2.5.6.2 1z"
+          fill="black" />
+      </svg>
+
+      <nav class="sidebar-nav">
+        <!-- Search -->
+        <div class="nav-icon" title="Buscar">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+          </svg>
+        </div>
+        <!-- Stats -->
+        <div class="nav-icon" title="Sua biblioteca">
+          <svg viewBox="0 0 24 24">
+            <path d="M5 3h2v18H5zm4 2h2v16H9zm4 4h2v12h-2zm4-6h2v18h-2z" />
+          </svg>
+        </div>
+        <!-- Add -->
+        <div class="nav-icon add-btn" title="Criar playlist">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:white">
+            <path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6z" />
+          </svg>
+        </div>
+        <!-- Heart / Liked -->
+        <div class="nav-icon heart-btn" title="Músicas curtidas">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:white">
+            <path
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+          </svg>
+        </div>
+        <!-- Bookmark -->
+        <div class="nav-icon" title="Salvo">
+          <div class="bookmark-icon"></div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar-logo">
+          Gisseli Rocha
+        </div>
+
+        <div class="topbar-center">
+          <button class="home-btn" aria-label="Início">
+            <svg viewBox="0 0 24 24">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+            </svg>
+          </button>
+
+          <div class="search-bar">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+            </svg>
+            <span>Artistas, músicas e podcast</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- PAGE CONTENT -->
+      <div class="content fade-in">
+
+        <!-- BANNER -->
+        <div class="banner">
+          <div class="banner-art">
+            <img src="./assets/DanielCaesar.png" alt="Capa da música Who Knows">
+          </div>
+          <div class="banner-info">
+            <div class="banner-type">music</div>
+            <div class="banner-title">Who Knows</div>
+            <div class="banner-artist">Daniel Caesar</div>
+          </div>
+        </div>
+
+        <!-- PLAY CONTROLS -->
+        <div class="controls-bar">
+          <button class="play-btn" id="mainPlayBtn" aria-label="Reproduzir">
+            <svg viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </button>
+          <button class="shuffle-btn" aria-label="Embaralhar">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- LYRICS SECTION -->
+        <div class="lyrics-section">
+          <div class="lyrics-title">Letra</div>
+          <div class="lyrics-text">
+            I'll probably be a waste of your time, but who knows?<br>
+            Chances are I'll step out of line, but who knows?<br>
+            Lately, you've set up in my mind<br>
+            Yeah, girl, you, and I like that.
+          </div>
+        </div>
+
+        <!-- DESCRIBE THE SONG -->
+        <div class="section">
+          <div class="section-card">
+            <div class="section-thumb">
+            </div>
+            <div class="section-body">
+              <div class="section-title">Describe the Song</div>
+              <div class="section-text">
+                "Who Knows", by Daniel Caesar, is a calm and emotional song. It talks about love, feelings, and
+                uncertainty in a relationship. In the song, Daniel Caesar feels afraid because he does not know if he is
+                good enough for the other person. Even with these doubts, he still has hope that the relationship can
+                work.<br><br>
+                The song also talks about being honest with emotions and wanting love and support from someone special.
+                The phrase "who knows?" means that nobody knows the future, but sometimes it is important to try and
+                take risks for love.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABOUT SONG -->
+        <div class="section">
+          <div class="section-card">
+            <div class="section-thumb">
+            </div>
+            <div class="section-body">
+              <div class="section-title">About song</div>
+              <div class="section-text">
+                I discovered "Who Knows", because of a friend.<br>
+                She told me to listen to this song, so I listened to it and I liked it very much.<br><br>
+                At first, I did not understand the lyrics because the song was in English, but I loved the melody.<br>
+                Later, my friend was showing me the lyrics of the song, and I identified with them.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- WHAT IT REMINDS ME OF -->
+        <div class="section">
+          <div class="section-card">
+            <div class="section-thumb">
+            </div>
+            <div class="section-body">
+              <div class="section-title">What It Reminds Me Of</div>
+              <div class="section-text">
+                The song Who Knows reminds me of loving someone a lot and being afraid of losing them. When someone is
+                very important to me, I feel scared of saying something wrong or not being good enough. The song makes
+                me think about love and fear.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- WHEN I LIKE LISTENING TO IT -->
+        <div class="section">
+          <div class="section-card">
+            <div class="section-thumb">
+            </div>
+            <div class="section-body">
+              <div class="section-title">When I Like Listening to It</div>
+              <div class="section-text">
+                I like to listen to this song at night, in my room, when I am studying, on the bus looking at the window
+                on a rainy day, at college when the class is boring, while I am washing the dishes, and while I am
+                taking a shower.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BEST PART FOR ME -->
+        <div class="best-part-section">
+          <div class="best-part-card">
+            <div class="section-thumb">
+            </div>
+            <div class="best-part-body">
+              <div class="section-title">Best Part for me</div>
+              <div class="best-part-lines" style="margin-top: 16px;">
+                <div class="best-part-line">
+                  <div class="lyric-en">Maybe we get married one day, but who knows?</div>
+                  <div class="lyric-pt">Talvez nos casemos um dia, mas quem sabe?</div>
+                </div>
+                <div class="best-part-line">
+                  <div class="lyric-en">Think I'll take that thought to the grave, but who knows?</div>
+                  <div class="lyric-pt">Acho que levarei esse pensamento para o túmulo, mas quem sabe?</div>
+                </div>
+                <div class="best-part-line">
+                  <div class="lyric-en">I know that I'll love you always</div>
+                  <div class="lyric-pt">Eu sei que sempre te amarei</div>
+                </div>
+                <div class="best-part-line">
+                  <div class="lyric-en">Yeah, girl, you and I'd like that</div>
+                  <div class="lyric-pt">Sim, garota, você e eu gostamos disso</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SPACER for player -->
+        <div style="height: 24px;"></div>
+
+      </div><!-- /content -->
+    </main>
+  </div><!-- /app -->
+
+  <!-- === PLAYER === -->
+  <footer class="player">
+    <div class="player-song">
+      <div class="player-thumb">
+        <img src="assets/DanielCaesar.png" alt="">
+      </div>
+      <div class="player-info">
+        <div class="player-name">Who Knows</div>
+        <div class="player-artist">Daniel Caesar</div>
+      </div>
+    </div>
+
+    <div class="player-center">
+      <div class="player-buttons">
+        <!-- Shuffle -->
+        <button class="ctrl-btn" aria-label="Embaralhar">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z" />
+          </svg>
+        </button>
+        <!-- Prev -->
+        <button class="ctrl-btn" aria-label="Anterior">
+          <svg viewBox="0 0 24 24">
+            <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
+          </svg>
+        </button>
+        <!-- Play -->
+        <button class="player-play-btn" id="playerPlayBtn" aria-label="Reproduzir">
+          <svg viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </button>
+        <!-- Next -->
+        <button class="ctrl-btn" aria-label="Próxima">
+          <svg viewBox="0 0 24 24">
+            <path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z" />
+          </svg>
+        </button>
+        <!-- Repeat -->
+        <button class="ctrl-btn" aria-label="Repetir">
+          <svg viewBox="0 0 24 24">
+            <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" />
+          </svg>
+        </button>
+      </div>
+      <div class="progress-row">
+        <span class="time" id="currentTime">0:49</span>
+        <div class="progress-bar" id="progressBar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <span class="time">3:48</span>
+      </div>
+    </div>
+
+    <div class="player-right">
+      <button class="ctrl-btn" aria-label="Volume">
+        <svg viewBox="0 0 24 24">
+          <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
+        </svg>
+      </button>
+      <div class="vol-bar">
+        <div class="vol-fill"></div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Play/pause toggle
+    let playing = false;
+    const playIcon = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+    const pauseIcon = `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+
+    function togglePlay(btn) {
+      playing = !playing;
+      btn.innerHTML = playing ? pauseIcon : playIcon;
+    }
+
+    document.getElementById('mainPlayBtn').addEventListener('click', function () {
+      togglePlay(this);
+    });
+
+    document.getElementById('playerPlayBtn').addEventListener('click', function () {
+      togglePlay(this);
+    });
+
+    // Progress bar interaction
+    const progressBar = document.getElementById('progressBar');
+    const progressFill = document.getElementById('progressFill');
+    const currentTimeEl = document.getElementById('currentTime');
+    const totalSecs = 228;
+
+    function formatTime(s) {
+      return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+    }
+
+    progressBar.addEventListener('click', function (e) {
+      const rect = this.getBoundingClientRect();
+      const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      progressFill.style.width = (pct * 100) + '%';
+      currentTimeEl.textContent = formatTime(pct * totalSecs);
+    });
+
+    // Simulated progress if playing
+    setInterval(() => {
+      if (!playing) return;
+      const pct = parseFloat(progressFill.style.width) || 22;
+      if (pct >= 100) { playing = false; return; }
+      const newPct = pct + (100 / totalSecs / 10);
+      progressFill.style.width = newPct + '%';
+      currentTimeEl.textContent = formatTime((newPct / 100) * totalSecs);
+    }, 100);
+
+    // INICIAR buttons
+    document.querySelectorAll('.iniciar-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.textContent = 'PAUSAR';
+        btn.style.background = '#158a3e';
+        setTimeout(() => {
+          btn.textContent = 'INICIAR';
+          btn.style.background = '';
+        }, 2000);
+      });
+    });
+  </script>
+</body>
+
+</html>
